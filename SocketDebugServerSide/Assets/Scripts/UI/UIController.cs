@@ -3,22 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ServerUnity.UI
+namespace SocketDebug.UI
 {
     public class UIController : MonoBehaviour
     {
         [SerializeField] private ServerObject _serverObject;
 
-        [SerializeField] private Text _debugText;
-
+        [SerializeField] private Text _textMessages;
+        [SerializeField] private Text _textIP;
         private void Awake()
         {
-             
+            _textIP.text += ServerObject.GetLocalIP();
         }
 
         private void OnEnable()
         {
-            _serverObject.onClientConnected += (client) => { LogMessage(client.ToString()); };
+            _serverObject.onClientConnected += (client) =>
+            {
+                client.onMessageRecived += (message) =>{ LogMessage(message.MessageType + " : " + message.MessageText + " -----" + message.MessageTime); };
+                LogMessage(client.ToString());
+            };
         }
         private void OnDisable()
         {
@@ -27,8 +31,8 @@ namespace ServerUnity.UI
 
         public void LogMessage(string message)
         {
-            _debugText.text += message;
-            _debugText.text += "\n";
+            _textMessages.text += message;
+            _textMessages.text += "\n";
         }
-    } 
+    }
 }

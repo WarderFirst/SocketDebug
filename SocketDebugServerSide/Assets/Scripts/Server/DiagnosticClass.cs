@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace ServerUnity {
+namespace SocketDebug {
    public static class DiagnosticClass {
         public static Stopwatch _timer = new Stopwatch();
     }

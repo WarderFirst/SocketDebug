@@ -64,8 +64,9 @@
     <Compile Include="Assets\Scripts\Server\ClientObject.cs" />
     <Compile Include="Assets\Scripts\Server\DiagnosticClass.cs" />
     <Compile Include="Assets\Scripts\Server\IClient.cs" />
-    <Compile Include="Assets\Scripts\Server\Message.cs" />
-    <Compile Include="Assets\Scripts\Server\MessageType.cs" />
+    <Compile Include="Assets\Scripts\Server\Messsage\IMessage.cs" />
+    <Compile Include="Assets\Scripts\Server\Messsage\Message.cs" />
+    <Compile Include="Assets\Scripts\Server\Messsage\Message1.cs" />
     <Compile Include="Assets\Scripts\Server\ServerObject.cs" />
     <Compile Include="Assets\Scripts\UI\UIController.cs" />
     <Reference Include="UnityEditor.StandardEvents">

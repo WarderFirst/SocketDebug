@@ -6,154 +6,96 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using NetworkClasses;
 
 using UnityEngine;
 using System.Collections;
 
-namespace ServerUnity
+namespace SocketDebug
 {
-    class ServerObject : MonoBehaviour
+    public class ServerObject : MonoBehaviour
     {
         protected internal List<ClientObject> _clients = new List<ClientObject>();
-        //List<TankData> _tanks = new List<TankData>();
         [SerializeField] string _ip = "192.168.87.170";
         int _port = 8888;
         TcpListener _server;
 
         public delegate void OnClientConnected(IClient client);
         public event OnClientConnected onClientConnected;
-        private void ClientConnected(IClient client)
+        private void ClientConnected(TcpClient client)
         {
+            GameObject newClient = new GameObject();
+            newClient.AddComponent<ClientObject>();
+            newClient.GetComponent<ClientObject>().Init(client, this);
+            Debug.Log("Client created");
+
             if (onClientConnected != null)
             {
-                onClientConnected.Invoke(client);
+                onClientConnected.Invoke(newClient.GetComponent<ClientObject>());
             }
         }
 
-        private void Awake()
-        {
-            Thread tcpListenerThread = new Thread(new ThreadStart(Listen));
-            tcpListenerThread.IsBackground = true;
-            tcpListenerThread.Start();
+        Thread ChildThread = null;
+        EventWaitHandle ChildThreadWait = new EventWaitHandle(true, EventResetMode.ManualReset);
+        EventWaitHandle MainThreadWait = new EventWaitHandle(true, EventResetMode.ManualReset);
 
-
-            //StartCoroutine(Listen());
-            //Listen();
-        }
-        public void Listen()
+        TcpClient tcpClient = null;
+        private void ChildThreadLoop()
         {
+            ChildThreadWait.Reset();
+            ChildThreadWait.WaitOne();
+
             _server = new TcpListener(IPAddress.Parse(_ip), _port);
             _server.Start();
             Debug.Log("Start Listening");
-            // Console.ReadLine();
-            //_server = new TcpListener(IPAddress.Parse(_ip), _port);
 
-            try
+            while (true)
             {
-                _server.Start();
-                while (true)
-                {
-                    TcpClient tcpClient = _server.AcceptTcpClient();
-                    DiagnosticClass._timer.Start();
-                    Debug.Log("StartTimer value=" + DiagnosticClass._timer.ElapsedMilliseconds);
-                    Debug.Log("ClientConnect");
-                    ClientObject client = new ClientObject(tcpClient, this);
-                    _clients.Add(client);
-                    client.Process();
-                    //Thread clientThread = new Thread(new ThreadStart(client.Process));
-                    //clientThread.Start();
-                    //yield return new WaitForSeconds(1f);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
+                ChildThreadWait.Reset();
+
+                // Do Update
+                tcpClient = _server.AcceptTcpClient();
+                DiagnosticClass._timer.Start();
+                Debug.Log("StartTimer value=" + DiagnosticClass._timer.ElapsedMilliseconds);
+                Debug.Log("ClientConnect");
+
+                WaitHandle.SignalAndWait(MainThreadWait, ChildThreadWait);
             }
         }
 
-
-        //public IEnumerator Listen()
-        //{
-        //    while(true)
-        //    {
-        //        using (TcpClient tcpClient = _server.AcceptTcpClient())
-        //        {
-        //            DiagnosticClass._timer.Start();
-        //            Debug.Log("StartTimer value=" + DiagnosticClass._timer.ElapsedMilliseconds);
-        //            Debug.Log("ClientConnect");
-        //            ClientObject client = new ClientObject(tcpClient, this);
-        //            _clients.Add(client);
-        //            client.Process();
-
-        //        }
-        //        yield return new WaitForFixedUpdate();
-        //    }
-        //}
-        //private void FixedUpdate()
-        //        {
-        //            //try
-        //            //{
-
-        //            //    TcpClient tcpClient = _server.AcceptTcpClient();
-        //            //    DiagnosticClass._timer.Start();
-        //            //    Debug.Log("StartTimer value=" + DiagnosticClass._timer.ElapsedMilliseconds);
-        //            //    Debug.Log("ClientConnect");
-        //            //    ClientObject client = new ClientObject(tcpClient, this);
-        //            //    _clients.Add(client);
-        //            //    client.Process();
-        //            //}
-        //            //catch (Exception e)
-        //            //{
-        //            //    Debug.Log(e);
-        //            //}
-        //        }
-        public void BroadCastAutorisation(Message msg, string id, string playerName)
+        void Awake()
         {
-            Debug.Log("Broadcast Autorisation");
-            foreach (ClientObject client in _clients)
-            {
-                if (client._id == id)
-                {
-                    // msg._messageType = MessageType.System;
-                    msg._methodName = "StartGame";
-                    msg._methodParameters = new Parameters(playerName, id);
-                    client.SendData(msg);
-                    // client.SendData(msg);
-                }
-                else
-                {
-
-                    if (client.IsAvailable)
-                    {
-                        msg._methodName = "ConnectNewPlayer";
-                        client.SendData(msg);
-                    }
-
-                }
-            }
+            _ip = GetLocalIP();
+            ChildThread = new Thread(ChildThreadLoop);
+            ChildThread.Start();
         }
 
-        public void BroadCastPosition(Message msg, string id)
+
+        void Update()
         {
-
-            foreach (ClientObject client in _clients)
+            // Copy Results out of the thread
+            if (tcpClient != null)
             {
-                if (client.IsAvailable)
-                {
-                    if (client._id == id)
-                    {
-                        msg._methodName = "Move";
-                    }
-                    else
-                    {
-                        msg._methodName = "EnemyMove";
-                    }
-                    client.SendData(msg);
-                }
-
+                ClientConnected(tcpClient);
+                tcpClient = null;
             }
+            // Copy pending changes into the thread
 
+            ChildThreadWait.Set();
+        }
+        public static string GetLocalIP()
+        {
+            IPHostEntry host;
+            string localIP = "0.0.0.0";
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                    break;
+                }
+            }
+            return localIP;
         }
     }
 }
