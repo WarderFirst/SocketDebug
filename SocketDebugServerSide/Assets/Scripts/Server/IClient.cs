@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
-using SocketDebug.Server.Messsage;
+using NetworkClasses.Server.Messsage;
 
-namespace SocketDebug
+namespace NetworkClasses
 {
     public interface IClient
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SocketDebug.UI
+namespace NetworkClasses.UI
 {
     public class UIController : MonoBehaviour
     {

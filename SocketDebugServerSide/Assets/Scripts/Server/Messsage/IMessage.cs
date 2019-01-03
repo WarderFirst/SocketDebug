@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocketDebug.Server.Messsage
+namespace NetworkClasses.Server.Messsage
 {
     public interface IMessage
     {

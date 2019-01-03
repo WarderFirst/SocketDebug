@@ -14,7 +14,7 @@ using System.Runtime.Serialization;
 using UnityEngine;
 using System.Collections;
 using System.Threading;
-using SocketDebug.Server.Messsage;
+using NetworkClasses.Server.Messsage;
 
 //namespace NetworkClasses {
 //    [System.Serializable]
@@ -44,7 +44,7 @@ using SocketDebug.Server.Messsage;
 
 //}
 
-namespace SocketDebug
+namespace NetworkClasses
 {
    public class ClientObject : MonoBehaviour, IClient
     {
@@ -223,7 +223,7 @@ namespace SocketDebug
 
                 var dData = new DebugData();
                 dData = bf.Deserialize(_ms) as DebugData;
-                newMessage = new Message(dData.type,this, dData.logString, System.DateTime.Now.ToString());
+                newMessage = new Message(MessageType.Log,this, dData.logString, System.DateTime.Now.ToString());
 
                 _ms.Close();
 
@@ -261,6 +261,43 @@ namespace SocketDebug
             _stream = client.GetStream();
             _server = server;
         }
+
+
+    }
+
+
+    [System.Serializable]
+    public class DebugData
+    {
+        public string logString;
+        public string stackTrace;
+        public LogType type;
+    }
+
+    [System.Serializable]
+    public enum LogType
+    {
+        //
+
+        // Summary:
+        //     LogType used for Errors.
+        Error = 0,
+        //
+        // Summary:
+        //     LogType used for Asserts. (These could also indicate an error inside Unity itself.)
+        Assert = 1,
+        //
+        // Summary:
+        //     LogType used for Warnings.
+        Warning = 2,
+        //
+        // Summary:
+        //     LogType used for regular log messages.
+        Log = 3,
+        //
+        // Summary:
+        //     LogType used for Exceptions.
+        Exception = 4
     }
 
     sealed class CustomizedBinder : SerializationBinder

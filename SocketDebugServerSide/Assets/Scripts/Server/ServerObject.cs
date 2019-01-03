@@ -10,13 +10,13 @@ using System.Threading;
 using UnityEngine;
 using System.Collections;
 
-namespace SocketDebug
+namespace NetworkClasses
 {
     public class ServerObject : MonoBehaviour
     {
         protected internal List<ClientObject> _clients = new List<ClientObject>();
         [SerializeField] string _ip = "192.168.87.170";
-        int _port = 8888;
+        int _port = 8850;
         TcpListener _server;
 
         public delegate void OnClientConnected(IClient client);
