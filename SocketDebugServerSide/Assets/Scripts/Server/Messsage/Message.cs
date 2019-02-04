@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 
-namespace NetworkClasses.Server.Messsage
+namespace SocketDebug.Server.Messsage
 {
     public class Message : IMessage
     {

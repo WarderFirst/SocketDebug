@@ -14,7 +14,8 @@ using System.Runtime.Serialization;
 using UnityEngine;
 using System.Collections;
 using System.Threading;
-using NetworkClasses.Server.Messsage;
+using SocketDebug.Server.Messsage;
+using NetworkClasses;
 
 //namespace NetworkClasses {
 //    [System.Serializable]
@@ -44,7 +45,7 @@ using NetworkClasses.Server.Messsage;
 
 //}
 
-namespace NetworkClasses
+namespace SocketDebug
 {
    public class ClientObject : MonoBehaviour, IClient
     {
@@ -57,7 +58,6 @@ namespace NetworkClasses
         [SerializeField] private TcpClient _client;
         public TcpClient TcpClient { get { return _client; } }
         NetworkStream _stream;
-        //protected internal TankData _tankData;
         BinaryFormatter _bf;
         MemoryStream _ms;
         //Message1 _message;
@@ -197,6 +197,11 @@ namespace NetworkClasses
 
             while (true)
             {
+                if(!_client.Connected)
+                {
+                    Debug.Log("disconnected");
+                    return;
+                }
                 ChildThreadWait.Reset();
 
                 // Do Update
@@ -227,6 +232,7 @@ namespace NetworkClasses
 
                 _ms.Close();
 
+                
                 WaitHandle.SignalAndWait(MainThreadWait, ChildThreadWait);
             }
         }
@@ -266,39 +272,7 @@ namespace NetworkClasses
     }
 
 
-    [System.Serializable]
-    public class DebugData
-    {
-        public string logString;
-        public string stackTrace;
-        public LogType type;
-    }
-
-    [System.Serializable]
-    public enum LogType
-    {
-        //
-
-        // Summary:
-        //     LogType used for Errors.
-        Error = 0,
-        //
-        // Summary:
-        //     LogType used for Asserts. (These could also indicate an error inside Unity itself.)
-        Assert = 1,
-        //
-        // Summary:
-        //     LogType used for Warnings.
-        Warning = 2,
-        //
-        // Summary:
-        //     LogType used for regular log messages.
-        Log = 3,
-        //
-        // Summary:
-        //     LogType used for Exceptions.
-        Exception = 4
-    }
+    
 
     sealed class CustomizedBinder : SerializationBinder
     {

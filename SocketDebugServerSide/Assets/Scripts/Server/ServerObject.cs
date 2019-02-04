@@ -10,7 +10,7 @@ using System.Threading;
 using UnityEngine;
 using System.Collections;
 
-namespace NetworkClasses
+namespace SocketDebug
 {
     public class ServerObject : MonoBehaviour
     {
@@ -23,14 +23,11 @@ namespace NetworkClasses
         public event OnClientConnected onClientConnected;
         private void ClientConnected(TcpClient client)
         {
-            GameObject newClient = new GameObject();
-            newClient.AddComponent<ClientObject>();
-            newClient.GetComponent<ClientObject>().Init(client, this);
-            Debug.Log("Client created");
+            ClientObject clientObject = CreateClient(client);
 
             if (onClientConnected != null)
             {
-                onClientConnected.Invoke(newClient.GetComponent<ClientObject>());
+                onClientConnected.Invoke(clientObject.GetComponent<ClientObject>());
             }
         }
 
@@ -68,8 +65,6 @@ namespace NetworkClasses
             ChildThread = new Thread(ChildThreadLoop);
             ChildThread.Start();
         }
-
-
         void Update()
         {
             // Copy Results out of the thread
@@ -82,6 +77,19 @@ namespace NetworkClasses
 
             ChildThreadWait.Set();
         }
+
+        private ClientObject CreateClient(TcpClient tcpClient)
+        {
+            GameObject newClient = new GameObject();
+            newClient.name = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString();
+            ClientObject newClientObject = newClient.AddComponent<ClientObject>();
+
+            newClientObject.Init(tcpClient, this);
+            Debug.Log("Client created");
+
+            return newClientObject;
+        }
+
         public static string GetLocalIP()
         {
             IPHostEntry host;
