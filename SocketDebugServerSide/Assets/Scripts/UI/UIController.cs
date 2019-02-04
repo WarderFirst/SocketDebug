@@ -29,8 +29,12 @@ namespace SocketDebug.UI
         private void OnEnable()
         {
             _serverObject.onClientConnected += (client) =>
-            {
-                client.onMessageRecived += (message) =>{ LogMessage(message.MessageType + " : " + message.MessageText + " -----" + message.MessageTime); };
+            {               
+                client.onMessageRecived += (message) =>
+                {
+                    string messageText = message.MessageType + " : " + message.MessageText + " -----" + message.MessageTime;
+                    SetMessageText(message.MessageType, messageText);
+                };
                 LogMessage(client.ToString());
             };
         }
@@ -39,16 +43,22 @@ namespace SocketDebug.UI
             _serverObject.onClientConnected -= (client) => { LogMessage(client.ToString()); };
         }
 
-        public void LogMessage(string message)
-        {
+        private void LogMessage(string message)
+        {           
             Text curText = Instantiate(_textPrefab, _content).GetComponent<Text>();
-
+            
             curText.text += message;
 
             _textList.Add(curText);
 
             //_textMessages.text += message;
             //_textMessages.text += "\n";
+        }
+
+        private void SetMessageText(Server.Messsage.MessageType messageType, string messageText)
+        {
+            string messageNew = ChangeCollorMessage(messageType, messageText);
+            LogMessage(messageNew);
         }
 
         public void Search()
@@ -95,6 +105,23 @@ namespace SocketDebug.UI
             {
                 bufElement.gameObject.SetActive(true);
             }
+        }
+
+        private string ChangeCollorMessage(Server.Messsage.MessageType messageType, string message)
+        {
+            string outPutString = message;
+
+            switch (messageType)
+            {
+                case Server.Messsage.MessageType.Error:
+                    outPutString = "<color=red>" + outPutString + "</color>";
+                    break;
+                case Server.Messsage.MessageType.Warning:
+                    outPutString = "<color=yellow>" + outPutString + "</color>";
+                    break;
+            }
+
+            return outPutString;
         }
     }
 }
