@@ -228,7 +228,8 @@ namespace SocketDebug
 
                 var dData = new DebugData();
                 dData = bf.Deserialize(_ms) as DebugData;
-                newMessage = new Message(MessageType.Log,this, dData.logString, System.DateTime.Now.ToString());
+                
+                newMessage = new Message(dData.type,this, dData.logString, System.DateTime.Now.ToString());
 
                 _ms.Close();
 

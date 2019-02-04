@@ -37,5 +37,28 @@ namespace SocketDebug.Server.Messsage
             _messageTime = messageTime;
             _messageSize = messageText.Length;
         }
+        public Message(NetworkClasses.LogType messageType, IClient client, string messageText, string messageTime)
+        {
+            switch (messageType)
+            {
+                case NetworkClasses.LogType.Log:
+                    _messageType = MessageType.Log;
+                    break;
+                case NetworkClasses.LogType.Error:
+                    _messageType = MessageType.Error;
+                    break;
+                case NetworkClasses.LogType.Warning:
+                    _messageType = MessageType.Warning;
+                    break;
+                default:
+                    _messageType = MessageType.Log;
+                    break;
+            }
+            //_messageType = messageType;
+            _client = client;
+            _messageText = messageText;
+            _messageTime = messageTime;
+            _messageSize = messageText.Length;
+        }
     }
 }
