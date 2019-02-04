@@ -53,16 +53,15 @@ namespace SocketDebug.UI
 
         public void Search()
         {
+            ActivateAllElementsInTextList();
             _searchedTextElements.Clear();
 
-            Debug.Log("Search");
             string searchText = _inputText.text;
 
-            foreach(Text bufText in _textList)
+            foreach (Text bufText in _textList)
             {
-                if(bufText.text.Contains(searchText))
+                if (bufText.text.Contains(searchText))
                 {
-                    Debug.Log("Contains :" + bufText.text);
                     _searchedTextElements.Add(bufText);
                 }
             }
@@ -72,24 +71,29 @@ namespace SocketDebug.UI
 
         private void ShowOnlyFindedText()
         {
-            List<Text> notConsistsElements = _textList.Where(p => !_searchedTextElements.Any(p2 => p2.text == p.text)).ToList();
+            List<Text> findedElements = _textList.Where(p => !_searchedTextElements.Any(p2 => p2.text == p.text)).ToList();
 
             //empty finded list
-            if (notConsistsElements.Count == 0)
+            if (findedElements.Count == 0)
             {
                 //activate all
-                foreach (var bufElement in _textList)
-                {
-                    bufElement.gameObject.SetActive(true);
-                }
+                ActivateAllElementsInTextList();
             }
             else
             {
                 //hide all not mached text
-                foreach (var bufElement in notConsistsElements)
+                foreach (var bufElement in findedElements)
                 {
                     bufElement.gameObject.SetActive(false);
                 }
+            }
+        }
+
+        private void ActivateAllElementsInTextList()
+        {
+            foreach (var bufElement in _textList)
+            {
+                bufElement.gameObject.SetActive(true);
             }
         }
     }
